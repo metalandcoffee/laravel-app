@@ -37,7 +37,8 @@ class Post {
     }
 
     public static function all() {
-        return cache()->rememberForever( 'posts.all', function() {
+        // Cache expires every hour.
+        return cache()->remember( 'posts.all', now()->addHour(), function() {
             return collect( File::files(resource_path('posts') ) )
                 ->map( fn($file) => YamlFrontMatter::parseFile( $file ) )
                 ->map( fn($document) => new Post(
@@ -52,13 +53,33 @@ class Post {
     }
 
     /**
+     * Find a post by its slug or fail gracefully.
+     *
+     * @param string $slug
+     *
+     * @return static ModelNotFoundException if post not found.
+     *
+     * @throws
+     *
+     */
+    public static function findOrFail( string $slug ): static {
+        $post = static::find( $slug );
+
+        if ( ! $post ) {
+            throw new ModelNotFoundException();
+        }
+
+        return $post;
+    }
+
+    /**
      * Find a post by its slug.
      *
      * @param string $slug
      *
-     * @return self
+     * @return static|null
      */
-    public static function find( string $slug ): self {
+    public static function find( string $slug ): static | null {
         return static::all()->firstWhere('slug', $slug);
     }
 
