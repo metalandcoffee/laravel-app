@@ -10,7 +10,20 @@ class Post extends Model
     use HasFactory;
     protected $guarded = [];
 
+    protected $with = ['author', 'category'];
+
     public function category() {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * @help When establishing a relationship between 2 models,
+     * Laravel reads this name and assumes that the foreign key will
+     * be called user_id (since the function is called user).
+     * So use the 2nd parameter of, for example, belongsTo, to
+     * specify the foreign ID.
+     */
+    public function author() { // user_id
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
