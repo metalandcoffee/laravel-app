@@ -5,15 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
-{
+class Post extends Model {
     use HasFactory;
+
     protected $guarded = [];
 
-    protected $with = ['author', 'category'];
+    protected $with = [ 'author', 'category' ];
+
+    public function scopeFilter( $query, $filters ) {
+        $query->when( $filters['search'] ?? false,
+            fn( $query, $search ) => $query
+                ->where( 'title', 'like', '%' . $search . '%' )
+                ->orWhere( 'body', 'like', '%' . $search . '%' ) );
+    }
 
     public function category() {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo( Category::class );
     }
 
     /**
@@ -24,6 +31,6 @@ class Post extends Model
      * specify the foreign ID.
      */
     public function author() { // user_id
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo( User::class, 'user_id' );
     }
 }
